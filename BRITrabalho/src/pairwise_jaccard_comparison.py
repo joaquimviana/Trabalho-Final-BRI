@@ -160,7 +160,7 @@ if __name__ == "__main__":
             for i in range(ps_half_permutation_count):
                 t0 = time() 
                 for j in range(all_fingerprints.shape[1]):
-                    all_minmaxps_finger[:,j,i] = minmaxps_hashing_n(all_fingerprints[:,j], indexes_permutations[i], n_slots)
+                    all_minmaxps_finger[:,j,i] = minmax_hashing_k_slot_asymetric(all_fingerprints[:,j], indexes_permutations[i], n_slots)
         
                 minmaxps_time[i] = time()- t0
         
