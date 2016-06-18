@@ -17,6 +17,7 @@ from scipy.sparse.csr import csr_matrix
 from functions.hashingFunctions import *
 from functions.kSlotFunctions import *
 from functions.twoSlotFunctions import *
+from pan_extractor import recoverOnlyText
 
 
 
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     
     '''
         dataset extraction
-    '''
+    
 #     corpus_name, (queries_, corpus_index, target, labels) = "meter", extract_meter_to_corpus_ranking_task()
     corpus_name, (queries_, corpus_index,target, labels) = "psa",extract_short_plagiarized_answers_to_ranking()
     
@@ -76,7 +77,9 @@ if __name__ == "__main__":
     documents = [dj['content'] for dj in corpus_index]
     
     del queries_, corpus_index
+    '''
     
+    queries,documents = recoverOnlyText()
     print("Queries: %d X Indexed Documents: %d"%(len(queries),len(documents)))
     
     '''
@@ -107,7 +110,7 @@ if __name__ == "__main__":
 #    permutation_count_list = [i for i in range(100,501, 100)]
     permutation_count_list = [i for i in range(100,101, 100)]
 
-    results_file_name = "%s%sx%d"%(corpus_name,str(permutation_count_list),permutation_repetition)
+    #results_file_name = "%s%sx%d"%(corpus_name,str(permutation_count_list),permutation_repetition)
 
 
     for permutation_count in permutation_count_list:

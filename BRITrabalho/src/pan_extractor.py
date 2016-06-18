@@ -46,22 +46,22 @@ def gerarDocument(pathFileXml,path):
 
 
 
-#TESTE
-pathDataset =  os.path.dirname(os.path.realpath(__file__))+"/../../../pan-plagiarism-corpus-2011"
-
-pathSuspicius = pathDataset+ "/external-detection-corpus/suspicious-document/**"
-pathFileXmls = glob.glob(pathSuspicius+"/*.txt")
-
-documents = []
-suspicius = []
-for pathFileXml in pathFileXmls:
-    fileText = open(pathSuspicius+"/"+pathFileXml, 'rb')
-    suspicius.append(fileText.read())
+def recoverOnlyText():
+    pathDataset =  os.path.dirname(os.path.realpath(__file__))+"/../../../pan-plagiarism-corpus-2011"
     
-pathDocument = pathDataset + "external-detection-corpus/source-document/**"
-pathFileXmls = glob.glob(pathDocument+"/*.txt")
-
-for pathFileXml in pathFileXmls:
-    fileText = open(pathSuspicius+"/"+pathFileXml, 'rb')
-    documents.append(fileText.read())
-
+    pathSuspicius = pathDataset+ "/external-detection-corpus/suspicious-document/**"
+    pathFileXmls = glob.glob(pathSuspicius+"/*.txt")
+    
+    documents = []
+    suspicius = []
+    for pathFileXml in pathFileXmls:
+        fileText = open(pathSuspicius+"/"+pathFileXml, 'rb')
+        suspicius.append(fileText.read())
+        
+    pathDocument = pathDataset + "external-detection-corpus/source-document/**"
+    pathFileXmls = glob.glob(pathDocument+"/*.txt")
+    
+    for pathFileXml in pathFileXmls:
+        fileText = open(pathSuspicius+"/"+pathFileXml, 'rb')
+        documents.append(fileText.read())
+    return suspicius,documents
