@@ -85,7 +85,8 @@ def minmax_hashing_k_slot_asymetric(element_set, permutation,k):
         if perm_id > max_id[slot_pos]:
             max_id[slot_pos] = perm_id
        
-    print("qtd de permutacao:",qtd,"\nSlot:",slot_pos)    
+    print("qtd de permutacao:",qtd,"\nSlot:",slot_pos)
+       
     #print('result', np.concatenate((min_id,max_id),axis= 0) )
     return np.concatenate((min_id,max_id),axis= 0) 
 

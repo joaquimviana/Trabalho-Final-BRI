@@ -101,9 +101,9 @@ if __name__ == "__main__":
             each permutation has one term-document matrix
     '''    
     permutation_repetition = 1
-    n_slots=4
+    n_slots=30
 #    permutation_count_list = [i for i in range(100,501, 100)]
-    permutation_count_list = [i for i in range(10,21, 10)]
+    permutation_count_list = [i for i in range(100,101, 100)]
 
     results_file_name = "%s%sx%d"%(corpus_name,str(permutation_count_list),permutation_repetition)
 
@@ -127,12 +127,14 @@ if __name__ == "__main__":
             all_minmax_finger = np.empty((2,all_fingerprints.shape[1],half_permutation_count),np.int)
             all_minps_finger = np.empty((2,all_fingerprints.shape[1],ps_permutation_count),np.int)
             all_minmaxps_finger = np.empty(((n_slots*2),all_fingerprints.shape[1],ps_half_permutation_count),np.int)
+            minmax_hashing_k_slot_asymetric_finger = np.empty(((n_slots*2),all_fingerprints.shape[1],ps_half_permutation_count),np.int)
             
             min_time = np.zeros((permutation_count,))
             
             minmax_time = np.zeros((half_permutation_count))            
             minps_time = np.zeros((ps_permutation_count))
             minmaxps_time = np.zeros((ps_half_permutation_count))
+            minmax_hashing_k_slot_asymetric_time = np.zeros((ps_half_permutation_count))
             
             
             for i in range(permutation_count):
@@ -160,19 +162,28 @@ if __name__ == "__main__":
             for i in range(ps_half_permutation_count):
                 t0 = time() 
                 for j in range(all_fingerprints.shape[1]):
-                    all_minmaxps_finger[:,j,i] = minmax_hashing_k_slot_asymetric(all_fingerprints[:,j], indexes_permutations[i], n_slots)
+                    minmax_hashing_k_slot_asymetric_finger[:,j,i] = minmax_hashing_k_slot_asymetric(all_fingerprints[:,j], indexes_permutations[i], n_slots)
+        
+                minmax_hashing_k_slot_asymetric_time[i] = time()- t0
+                
+            for i in range(ps_half_permutation_count):
+                t0 = time() 
+                for j in range(all_fingerprints.shape[1]):
+                    all_minmaxps_finger[:,j,i] = minmaxps_hashing_n(all_fingerprints[:,j], indexes_permutations[i], n_slots)
         
                 minmaxps_time[i] = time()- t0
-        
+
             min_jaccard_sim = pairwise_jaccard_similarity(set_per_row = all_min_finger[0,:,:])
             minmax_jaccard_sim = pairwise_jaccard_similarity(set_per_row = np.hstack([all_minmax_finger[i,:,:] for i in range(all_minmax_finger.shape[0])]))
             minps_jaccard_sim = pairwise_jaccard_similarity(set_per_row = np.hstack([all_minps_finger[i,:,:] for i in range(all_minps_finger.shape[0])]))
             minmaxps_jaccard_sim = pairwise_jaccard_similarity(set_per_row = np.hstack([all_minmaxps_finger[i,:,:] for i in range(all_minmaxps_finger.shape[0])]))
-    
-            prepare_results(approach_name="min              ", approach_time=min_time.sum(), approach_jaccard=min_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
-            prepare_results(approach_name="minmax           ", approach_time=minmax_time.sum(), approach_jaccard=minmax_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
-            prepare_results(approach_name="min   (voc. slot)", approach_time=minps_time.sum(), approach_jaccard=minps_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
-            prepare_results(approach_name="minmax(voc. slot)", approach_time=minmaxps_time.sum(), approach_jaccard=minmaxps_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
+            minmax_hashing_k_slot_asymetric_jaccard_sim = pairwise_jaccard_similarity(set_per_row = np.hstack([minmax_hashing_k_slot_asymetric_finger[i,:,:] for i in range(minmax_hashing_k_slot_asymetric_finger.shape[0])]))
+            
+            prepare_results(approach_name="min                    ", approach_time=min_time.sum(), approach_jaccard=min_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
+            prepare_results(approach_name="minmax                 ", approach_time=minmax_time.sum(), approach_jaccard=minmax_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
+            prepare_results(approach_name="min   (voc. slot)      ", approach_time=minps_time.sum(), approach_jaccard=minps_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
+            prepare_results(approach_name="minmax_k_slot_asymetric", approach_time=minmaxps_time.sum(), approach_jaccard=minmaxps_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
+            prepare_results(approach_name="minmaxps_n             ", approach_time=minmaxps_time.sum(), approach_jaccard=minmax_hashing_k_slot_asymetric_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
 
             print("%d permutations[%d/%d]:"%(permutation_count,permutation_repetitioni,permutation_repetition))
             for approach_name, ap_dict in  results[permutation_count].items():
