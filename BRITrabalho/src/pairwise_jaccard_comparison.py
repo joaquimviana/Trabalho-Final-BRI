@@ -101,7 +101,7 @@ if __name__ == "__main__":
             each permutation has one term-document matrix
     '''    
     permutation_repetition = 1
-    n_slots=3
+    n_slots=4
 #    permutation_count_list = [i for i in range(100,501, 100)]
     permutation_count_list = [i for i in range(10,21, 10)]
 

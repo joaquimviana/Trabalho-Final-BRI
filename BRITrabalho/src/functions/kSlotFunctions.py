@@ -50,25 +50,32 @@ def minmax_hashing_k_slot_asymetric(element_set, permutation,k):
     row_count = element_set.shape[0]
     slot_size = row_count
     slot_size //= k
-    
+    slot_remainder = row_count % k
     
     min_id = []
     max_id = []
+    slot_ranges = []
     for y in range(k): 
         min_id.append(np.Inf)
         max_id.append(-np.Inf)
-
+        
+        slot_ranges.append(slot_size)
+        if(slot_remainder > 0):
+            slot_ranges[y] += 1
+            slot_remainder -= 1
+    
+        
+    qtd = 0  #var only needs for debug
     
     slot_pos = 0
-    slot_range = slot_size
-    qtd = 0
+    slot_range = slot_ranges[slot_pos]
     for i in range(len(rows)):
         perm_id = permutation[rows[i]]
 
         while(slot_range < rows[i]):
-            print("qtd de permutacao:",qtd,"\nSlot:",slot_pos) 
-            slot_range += slot_size
+            print("qtd de permutacao:",qtd,"\nSlot:",slot_pos)            
             slot_pos += 1
+            slot_range += slot_ranges[slot_pos]
             qtd = 0
         
         qtd = qtd + 1
@@ -78,7 +85,7 @@ def minmax_hashing_k_slot_asymetric(element_set, permutation,k):
         if perm_id > max_id[slot_pos]:
             max_id[slot_pos] = perm_id
        
-         
+    print("qtd de permutacao:",qtd,"\nSlot:",slot_pos)    
     #print('result', np.concatenate((min_id,max_id),axis= 0) )
     return np.concatenate((min_id,max_id),axis= 0) 
 
