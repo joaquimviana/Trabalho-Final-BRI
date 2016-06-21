@@ -58,7 +58,7 @@ def recoverOnlyText():
         fileText = open(pathFileXml, 'rb')
         suspicius.append(fileText.read())
         
-    pathDocument = pathDataset + "external-detection-corpus/source-document/**"
+    pathDocument = pathDataset + "/external-detection-corpus/source-document/**"
     pathFileXmls = glob.glob(pathDocument+"/*.txt")
     
     for pathFileXml in pathFileXmls:

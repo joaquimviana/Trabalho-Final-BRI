@@ -72,7 +72,10 @@ def panDatasetToFingerprint():
     print("Queries: %d X Indexed Documents: %d"%(len(queries),len(documents)))
     
     vectorizer = CountVectorizer(binary=True)
-    return vectorizer.fit_transform(queries+documents, None).T,vectorizer
+    all_fingerprints,vectorizer = vectorizer.fit_transform(queries+documents, None).T,vectorizer
+    
+    del queries,documents 
+    return all_fingerprints,vectorizer
 
 def short_plagiarizedToFingerprint():   
     corpus_name, (queries_, corpus_index,target, labels) = "psa",extract_short_plagiarized_answers_to_ranking()
@@ -114,7 +117,7 @@ def printResult(resultName,all_minmaxps_finger,minps_time,results,permutation_co
 if __name__ == "__main__":
     
    
-    all_fingerprints,vectorizer = short_plagiarizedToFingerprint()
+    all_fingerprints,vectorizer = panDatasetToFingerprint()
     print('a', all_fingerprints.shape)
     
     vocabulary_indexes = [di for di in vectorizer.vocabulary_.values()]
