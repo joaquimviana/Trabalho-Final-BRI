@@ -62,31 +62,59 @@ def pairwise_jaccard_similarity(set_per_row):
     
     return results.reshape((set_per_row.shape[0],set_per_row.shape[0]))
 
-def panDatasetExtraction():
-    print(0)
-    
-if __name__ == "__main__":
-    
-    '''
+
+'''
         dataset extraction
+'''
+
+def panDatasetToFingerprint():     
+    queries,documents = recoverOnlyText()
+    print("Queries: %d X Indexed Documents: %d"%(len(queries),len(documents)))
     
-#     corpus_name, (queries_, corpus_index, target, labels) = "meter", extract_meter_to_corpus_ranking_task()
+    vectorizer = CountVectorizer(binary=True)
+    return vectorizer.fit_transform(queries+documents, None).T,vectorizer
+
+def short_plagiarizedToFingerprint():   
     corpus_name, (queries_, corpus_index,target, labels) = "psa",extract_short_plagiarized_answers_to_ranking()
     
     queries = [qi['content'] for qi in queries_]
     documents = [dj['content'] for dj in corpus_index]
     
-    del queries_, corpus_index
-    '''
-    
-    queries,documents = recoverOnlyText()
-    print("Queries: %d X Indexed Documents: %d"%(len(queries),len(documents)))
+    del queries_, corpus_index    
     
     '''
         using scikit-learn : tokenization
     '''    
     vectorizer = CountVectorizer(binary=True)
-    all_fingerprints = vectorizer.fit_transform(queries+documents, None).T
+    return vectorizer.fit_transform(queries+documents, None).T,vectorizer
+
+def generateResult(permutation_count,all_fingerprints,function_out_size,indexes_permutations,hasing_function,n_slots = -1):
+   
+    all_minps_finger = np.empty((function_out_size,all_fingerprints.shape[1],permutation_count),np.int)
+    minps_time = np.zeros((permutation_count))
+   
+    for i in range(permutation_count):
+                t0 = time()
+                for j in range(all_fingerprints.shape[1]):
+                    if(n_slots == -1):
+                        all_minps_finger[:,j,i] = hasing_function(all_fingerprints[:,j], indexes_permutations[i])
+                    else:
+                        all_minps_finger[:,j,i] = hasing_function(all_fingerprints[:,j], indexes_permutations[i],n_slots)                   
+                   
+                minps_time[i] = time()- t0
+   
+    return all_minps_finger,minps_time
+
+
+def printResult(resultName,all_minmaxps_finger,minps_time,results,permutation_count):
+    minmaxps_jaccard_sim = pairwise_jaccard_similarity(set_per_row = np.hstack([all_minmaxps_finger[i,:,:] for i in range(all_minmaxps_finger.shape[0])]))
+    prepare_results(approach_name=resultName, approach_time=minps_time.sum(), approach_jaccard=minmaxps_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)   
+ 
+
+if __name__ == "__main__":
+    
+   
+    all_fingerprints,vectorizer = short_plagiarizedToFingerprint()
     print('a', all_fingerprints.shape)
     
     vocabulary_indexes = [di for di in vectorizer.vocabulary_.values()]
@@ -106,9 +134,9 @@ if __name__ == "__main__":
             each permutation has one term-document matrix
     '''    
     permutation_repetition = 1
-    n_slots=30
+    n_slots=2
 #    permutation_count_list = [i for i in range(100,501, 100)]
-    permutation_count_list = [i for i in range(100,101, 100)]
+    permutation_count_list = [i for i in range(10,100, 10)]
 
     #results_file_name = "%s%sx%d"%(corpus_name,str(permutation_count_list),permutation_repetition)
 
@@ -128,68 +156,18 @@ if __name__ == "__main__":
             
             all_min_finger    = np.empty((1,all_fingerprints.shape[1],permutation_count),np.int)
             print('a', (1,all_fingerprints.shape[1],permutation_count))
-            #print('a', all_min_finger)
-            all_minmax_finger = np.empty((2,all_fingerprints.shape[1],half_permutation_count),np.int)
-            all_minps_finger = np.empty((2,all_fingerprints.shape[1],ps_permutation_count),np.int)
-            all_minmaxps_finger = np.empty(((n_slots*2),all_fingerprints.shape[1],ps_half_permutation_count),np.int)
-            minmax_hashing_k_slot_asymetric_finger = np.empty(((n_slots*2),all_fingerprints.shape[1],ps_half_permutation_count),np.int)
             
-            min_time = np.zeros((permutation_count,))
-            
-            minmax_time = np.zeros((half_permutation_count))            
-            minps_time = np.zeros((ps_permutation_count))
-            minmaxps_time = np.zeros((ps_half_permutation_count))
-            minmax_hashing_k_slot_asymetric_time = np.zeros((ps_half_permutation_count))
-            
-            
-            for i in range(permutation_count):
-                t0 = time() 
-                for j in range(all_fingerprints.shape[1]):
-                    all_min_finger[:,j,i] = min_hashing(all_fingerprints[:,j], indexes_permutations[i])
-                    
-                min_time[i] = time()- t0
-    
-            
-            for i in range(half_permutation_count):
-                t0 = time() 
-                for j in range(all_fingerprints.shape[1]):
-                    all_minmax_finger[:,j,i] = minmax_hashing(all_fingerprints[:,j], indexes_permutations[i])
-        
-                minmax_time[i] = time()- t0
-    
-            for i in range(ps_permutation_count):
-                t0 = time() 
-                for j in range(all_fingerprints.shape[1]):
-                    all_minps_finger[:,j,i] = minps_hashing(all_fingerprints[:,j], indexes_permutations[i])
-        
-                minps_time[i] = time()- t0
-    
-            for i in range(ps_half_permutation_count):
-                t0 = time() 
-                for j in range(all_fingerprints.shape[1]):
-                    minmax_hashing_k_slot_asymetric_finger[:,j,i] = minmax_hashing_k_slot_asymetric(all_fingerprints[:,j], indexes_permutations[i], n_slots)
-        
-                minmax_hashing_k_slot_asymetric_time[i] = time()- t0
-                
-            for i in range(ps_half_permutation_count):
-                t0 = time() 
-                for j in range(all_fingerprints.shape[1]):
-                    all_minmaxps_finger[:,j,i] = minmaxps_hashing_n(all_fingerprints[:,j], indexes_permutations[i], n_slots)
-        
-                minmaxps_time[i] = time()- t0
+            all_minps_finger,minps_time = generateResult(ps_permutation_count,all_fingerprints,2,indexes_permutations,minps_hashing)
+            all_minmaxps_finger,minmaxps_time = generateResult(ps_half_permutation_count,all_fingerprints,4,indexes_permutations,minmaxps_hashing)
+            all_minmaxps_n_finger,minmaxps_n_time = generateResult(ps_half_permutation_count,all_fingerprints,n_slots*2,indexes_permutations,minmaxps_hashing_n,n_slots)
+            all_minmax_hashing_k_slot_asymetric_finger,all_minmax_hashing_k_slot_asymetric_time = generateResult(ps_half_permutation_count,all_fingerprints,n_slots*2,indexes_permutations,minmax_hashing_k_slot_asymetric,n_slots)  
+           
+            printResult("minps                              ",all_minps_finger,minps_time,results,permutation_count)
+            printResult("minmaxps                           ",all_minmaxps_finger,minmaxps_time,results,permutation_count)
+            printResult("minmaxps_n                         ",all_minmaxps_n_finger,minmaxps_n_time,results,permutation_count)
+            printResult("all_minmax_hashing_k_slot_asymetric",all_minmax_hashing_k_slot_asymetric_finger,all_minmax_hashing_k_slot_asymetric_time,results,permutation_count)
 
-            min_jaccard_sim = pairwise_jaccard_similarity(set_per_row = all_min_finger[0,:,:])
-            minmax_jaccard_sim = pairwise_jaccard_similarity(set_per_row = np.hstack([all_minmax_finger[i,:,:] for i in range(all_minmax_finger.shape[0])]))
-            minps_jaccard_sim = pairwise_jaccard_similarity(set_per_row = np.hstack([all_minps_finger[i,:,:] for i in range(all_minps_finger.shape[0])]))
-            minmaxps_jaccard_sim = pairwise_jaccard_similarity(set_per_row = np.hstack([all_minmaxps_finger[i,:,:] for i in range(all_minmaxps_finger.shape[0])]))
-            minmax_hashing_k_slot_asymetric_jaccard_sim = pairwise_jaccard_similarity(set_per_row = np.hstack([minmax_hashing_k_slot_asymetric_finger[i,:,:] for i in range(minmax_hashing_k_slot_asymetric_finger.shape[0])]))
             
-            prepare_results(approach_name="min                    ", approach_time=min_time.sum(), approach_jaccard=min_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
-            prepare_results(approach_name="minmax                 ", approach_time=minmax_time.sum(), approach_jaccard=minmax_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
-            prepare_results(approach_name="min   (voc. slot)      ", approach_time=minps_time.sum(), approach_jaccard=minps_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
-            prepare_results(approach_name="minmax_k_slot_asymetric", approach_time=minmaxps_time.sum(), approach_jaccard=minmaxps_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
-            prepare_results(approach_name="minmaxps_n             ", approach_time=minmaxps_time.sum(), approach_jaccard=minmax_hashing_k_slot_asymetric_jaccard_sim, results_dict=results, perm_repetition=permutation_repetition, perm_count=permutation_count, perm_true_jaccard=true_jaccard_sim)
-
             print("%d permutations[%d/%d]:"%(permutation_count,permutation_repetitioni,permutation_repetition))
             for approach_name, ap_dict in  results[permutation_count].items():
                 squared_errors = ap_dict['errors'][permutation_repetitioni]**2
