@@ -117,7 +117,9 @@ def printResult(resultName,all_minmaxps_finger,minps_time,results,permutation_co
 if __name__ == "__main__":
     
    
-    all_fingerprints,vectorizer = panDatasetToFingerprint()
+    #all_fingerprints,vectorizer = panDatasetToFingerprint()
+    all_fingerprints,vectorizer = short_plagiarizedToFingerprint()
+    
     print('a', all_fingerprints.shape)
     
     vocabulary_indexes = [di for di in vectorizer.vocabulary_.values()]
@@ -160,15 +162,41 @@ if __name__ == "__main__":
             all_min_finger    = np.empty((1,all_fingerprints.shape[1],permutation_count),np.int)
             print('a', (1,all_fingerprints.shape[1],permutation_count))
             
+            all_minhash_finger,minhash_time = generateResult(ps_permutation_count,all_fingerprints,2,indexes_permutations,min_hashing)
+            printResult("min_hashing                        ",all_minhash_finger,minhash_time,results,permutation_count)
+            del all_minhash_finger,minhash_time
+            
+            all_maxhash_finger,maxhash_time = generateResult(ps_permutation_count,all_fingerprints,2,indexes_permutations,max_hashing)
+            printResult("max_hashing                        ",all_maxhash_finger,maxhash_time,results,permutation_count)
+            del all_maxhash_finger,maxhash_time
+            
+            all_minmaxhash_finger,minmaxhash_time = generateResult(ps_permutation_count,all_fingerprints,2,indexes_permutations,minmax_hashing)
+            printResult("minmax_hashing                     ",all_minmaxhash_finger,minmaxhash_time,results,permutation_count)
+            del all_minmaxhash_finger,minmaxhash_time
+            
             all_minps_finger,minps_time = generateResult(ps_permutation_count,all_fingerprints,2,indexes_permutations,minps_hashing)
-            all_minmaxps_finger,minmaxps_time = generateResult(ps_half_permutation_count,all_fingerprints,4,indexes_permutations,minmaxps_hashing)
-            all_minmaxps_n_finger,minmaxps_n_time = generateResult(ps_half_permutation_count,all_fingerprints,n_slots*2,indexes_permutations,minmaxps_hashing_n,n_slots)
-            all_minmax_hashing_k_slot_asymetric_finger,all_minmax_hashing_k_slot_asymetric_time = generateResult(ps_half_permutation_count,all_fingerprints,n_slots*2,indexes_permutations,minmax_hashing_k_slot_asymetric,n_slots)  
-           
             printResult("minps                              ",all_minps_finger,minps_time,results,permutation_count)
+            del all_minps_finger,minps_time
+            
+            all_minmaxps_finger,minmaxps_time = generateResult(ps_half_permutation_count,all_fingerprints,4,indexes_permutations,minmaxps_hashing)
             printResult("minmaxps                           ",all_minmaxps_finger,minmaxps_time,results,permutation_count)
+            del all_minmaxps_finger,minmaxps_time
+            
+            all_minmaxps_n_finger,minmaxps_n_time = generateResult(ps_half_permutation_count,all_fingerprints,n_slots*2,indexes_permutations,minmaxps_hashing_n,n_slots)
             printResult("minmaxps_n                         ",all_minmaxps_n_finger,minmaxps_n_time,results,permutation_count)
+            del all_minmaxps_n_finger,minmaxps_n_time
+            
+            all_minmax_hashing_k_slot_asymetric_finger,all_minmax_hashing_k_slot_asymetric_time = generateResult(ps_half_permutation_count,all_fingerprints,n_slots*2,indexes_permutations,minmax_hashing_k_slot_asymetric,n_slots)  
             printResult("all_minmax_hashing_k_slot_asymetric",all_minmax_hashing_k_slot_asymetric_finger,all_minmax_hashing_k_slot_asymetric_time,results,permutation_count)
+            del all_minmax_hashing_k_slot_asymetric_finger,all_minmax_hashing_k_slot_asymetric_time            
+            
+            all_minmax_hashing_two_slot_asymetric_finger,all_minmax_hashing_two_slot_asymetric_time = generateResult(ps_half_permutation_count,all_fingerprints,n_slots*2,indexes_permutations,minmax_hashing_two_slot_asymetric) 
+            printResult("minmax_hashing_two_slot_asymetric  ",all_minmax_hashing_two_slot_asymetric_finger,all_minmax_hashing_two_slot_asymetric_time,results,permutation_count)
+            del all_minmax_hashing_two_slot_asymetric_finger,all_minmax_hashing_two_slot_asymetric_time
+            
+            
+            
+            
 
             
             print("%d permutations[%d/%d]:"%(permutation_count,permutation_repetitioni,permutation_repetition))
