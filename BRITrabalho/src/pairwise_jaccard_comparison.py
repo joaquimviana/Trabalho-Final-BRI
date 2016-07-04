@@ -139,7 +139,7 @@ if __name__ == "__main__":
             each permutation has one term-document matrix
     '''    
     permutation_repetition = 1
-    n_slots=2
+    n_slots=4
 #    permutation_count_list = [i for i in range(100,501, 100)]
     permutation_count_list = [i for i in range(10,100, 10)]
 
@@ -190,7 +190,7 @@ if __name__ == "__main__":
             printResult("all_minmax_hashing_k_slot_asymetric",all_minmax_hashing_k_slot_asymetric_finger,all_minmax_hashing_k_slot_asymetric_time,results,permutation_count)
             del all_minmax_hashing_k_slot_asymetric_finger,all_minmax_hashing_k_slot_asymetric_time            
             
-            all_minmax_hashing_two_slot_asymetric_finger,all_minmax_hashing_two_slot_asymetric_time = generateResult(ps_half_permutation_count,all_fingerprints,n_slots*2,indexes_permutations,minmax_hashing_two_slot_asymetric) 
+            all_minmax_hashing_two_slot_asymetric_finger,all_minmax_hashing_two_slot_asymetric_time = generateResult(ps_half_permutation_count,all_fingerprints,4,indexes_permutations,minmax_hashing_two_slot_asymetric) 
             printResult("minmax_hashing_two_slot_asymetric  ",all_minmax_hashing_two_slot_asymetric_finger,all_minmax_hashing_two_slot_asymetric_time,results,permutation_count)
             del all_minmax_hashing_two_slot_asymetric_finger,all_minmax_hashing_two_slot_asymetric_time
             
